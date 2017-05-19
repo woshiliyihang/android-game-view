@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="ProjectModuleManager">
+    <modules>
+      <module fileurl="file://$PROJECT_DIR$/AndroidGameView.iml" filepath="$PROJECT_DIR$/AndroidGameView.iml" />
+      <module fileurl="file://$PROJECT_DIR$/androidgameviewbase/androidgameviewbase.iml" filepath="$PROJECT_DIR$/androidgameviewbase/androidgameviewbase.iml" />
+      <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
+    </modules>
+  </component>
+</project>
