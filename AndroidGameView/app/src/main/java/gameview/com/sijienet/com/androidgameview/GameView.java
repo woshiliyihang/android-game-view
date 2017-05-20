@@ -1,10 +1,8 @@
 package gameview.com.sijienet.com.androidgameview;
 
 import android.content.Context;
-import android.graphics.Canvas;
 import android.util.AttributeSet;
 import android.util.Log;
-import android.view.MotionEvent;
 import android.view.View;
 
 import org.jbox2d.collision.AABB;
@@ -16,7 +14,8 @@ import org.jbox2d.dynamics.contacts.ContactPoint;
 import org.jbox2d.dynamics.contacts.ContactResult;
 import org.jbox2d.dynamics.joints.DistanceJoint;
 import org.jbox2d.dynamics.joints.DistanceJointDef;
-import org.jbox2d.dynamics.joints.Joint;
+import org.jbox2d.dynamics.joints.GearJoint;
+import org.jbox2d.dynamics.joints.GearJointDef;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
 
@@ -51,6 +50,10 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
     private Body xuanDef;
     private Body xuanDef2;
     private RevoluteJoint xuanJoin;
+    private RectGameObj xuanZhuan3;
+    private Body xuanDef3;
+    private RectGameObj xuanZhuan4;
+    private Body xuanDef4;
 
     public GameView(Context context) {
         super(context);
@@ -132,6 +135,20 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         xuanZhuan2.height=20;
         addGameObj(xuanZhuan2);
 
+        xuanZhuan3 = new RectGameObj(getContext());
+        xuanZhuan3.x=0;
+        xuanZhuan3.y=1205;
+        xuanZhuan3.width=200;
+        xuanZhuan3.height=10;
+        addGameObj(xuanZhuan3);
+
+        xuanZhuan4 = new RectGameObj(getContext());
+        xuanZhuan4.x=0;
+        xuanZhuan4.y=1705;
+        xuanZhuan4.width=200;
+        xuanZhuan4.height=10;
+        addGameObj(xuanZhuan4);
+
         useSort();
 
         //设置物理世界
@@ -151,7 +168,11 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         bottomDef = createPolygon(rectGameObj2.x, rectGameObj2.y, rectGameObj2.width, rectGameObj2.height, false);
         xuanDef = createPolygon(xuanZhuan.x, xuanZhuan.y, xuanZhuan.width, xuanZhuan.height, false);
         xuanDef2 = createPolygon(xuanZhuan2.x, xuanZhuan2.y, xuanZhuan2.width, xuanZhuan2.height, true);
+        xuanDef3 = createPolygon(xuanZhuan3.x, xuanZhuan3.y, xuanZhuan3.width, xuanZhuan3.height, false);
+        xuanDef4 = createPolygon(xuanZhuan4.x, xuanZhuan4.y, xuanZhuan4.width, xuanZhuan4.height, false);
 
+        addGameBodyBind(xuanZhuan4,xuanDef4);
+        addGameBodyBind(xuanZhuan3,xuanDef3);
         addGameBodyBind(xuanZhuan,xuanDef);
         addGameBodyBind(xuanZhuan2,xuanDef2);
         addGameBodyBind(rectGameObj,createPolygon(rectGameObj.x,rectGameObj.y,rectGameObj.width,rectGameObj.height,true));
@@ -175,9 +196,25 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         lineGameObj.distanceJoint=joint;
         lineGameObj.rate=RATE;
 
+        //添加关节
         addBodyMaDa();
 
+        RevoluteJoint revoluteJoint = addBodyMaDa3();
+        RevoluteJoint revoluteJoint1 = addBodyMaDa4();
+        //齿轮关节
+        chaLun(revoluteJoint,revoluteJoint1);
+
         world.setContactListener(this);
+    }
+
+    private void chaLun(RevoluteJoint revoluteJoint, RevoluteJoint revoluteJoint1) {
+        GearJointDef gearJointDef=new GearJointDef();
+        gearJointDef.joint1=revoluteJoint;
+        gearJointDef.joint2=revoluteJoint1;
+        gearJointDef.body1=xuanDef3;
+        gearJointDef.body2=xuanDef4;
+        gearJointDef.ratio=2;//角度比
+        GearJoint gearJoint= (GearJoint) world.createJoint(gearJointDef);
     }
 
     private void addBodyMaDa() {
@@ -187,6 +224,23 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         revoluteJointDef.motorSpeed=10;//速度
         revoluteJointDef.enableMotor=true;//启动
         xuanJoin = (RevoluteJoint) world.createJoint(revoluteJointDef);
+    }
+
+    private RevoluteJoint addBodyMaDa3() {
+        RevoluteJointDef revoluteJointDef=new RevoluteJointDef();
+        revoluteJointDef.initialize(world.getGroundBody(),xuanDef3,xuanDef3.getWorldCenter());
+        revoluteJointDef.maxMotorTorque=20;//扭矩
+        revoluteJointDef.motorSpeed=20;//速度
+        revoluteJointDef.enableMotor=true;//启动
+        RevoluteJoint joint = (RevoluteJoint) world.createJoint(revoluteJointDef);
+        return joint;
+    }
+
+    private RevoluteJoint addBodyMaDa4() {
+        RevoluteJointDef revoluteJointDef=new RevoluteJointDef();
+        revoluteJointDef.initialize(world.getGroundBody(),xuanDef4,xuanDef4.getWorldCenter());
+        RevoluteJoint joint = (RevoluteJoint) world.createJoint(revoluteJointDef);
+        return joint;
     }
 
     private void addBodyJoin() {
