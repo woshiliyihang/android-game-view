@@ -17,6 +17,8 @@ import org.jbox2d.dynamics.contacts.ContactResult;
 import org.jbox2d.dynamics.joints.DistanceJoint;
 import org.jbox2d.dynamics.joints.DistanceJointDef;
 import org.jbox2d.dynamics.joints.Joint;
+import org.jbox2d.dynamics.joints.RevoluteJoint;
+import org.jbox2d.dynamics.joints.RevoluteJointDef;
 
 import gameview.com.sijienet.com.androidgameviewbase.AndroidGameViewBase;
 
@@ -44,6 +46,11 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
     private Body topDef;
     private Body bottomDef;
     private DistanceJoint joint;
+    private RectGameObj xuanZhuan;
+    private RectGameObj xuanZhuan2;
+    private Body xuanDef;
+    private Body xuanDef2;
+    private RevoluteJoint xuanJoin;
 
     public GameView(Context context) {
         super(context);
@@ -111,6 +118,20 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         addGameObj(lineGameObj);
         lineGameObj.index=8;
 
+        xuanZhuan = new RectGameObj(getContext());
+        xuanZhuan.x=0;
+        xuanZhuan.y=805;
+        xuanZhuan.width=200;
+        xuanZhuan.height=10;
+        addGameObj(xuanZhuan);
+
+        xuanZhuan2 = new RectGameObj(getContext());
+        xuanZhuan2.x=0;
+        xuanZhuan2.y=800;
+        xuanZhuan2.width=200;
+        xuanZhuan2.height=20;
+        addGameObj(xuanZhuan2);
+
         useSort();
 
         //设置物理世界
@@ -128,6 +149,11 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         circleDef = createCircleDef(circleGameObj.x, circleGameObj.y, circleGameObj.radius, false);
         topDef = createPolygon(rectGameObj1.x, rectGameObj1.y, rectGameObj1.width, rectGameObj1.height, false);
         bottomDef = createPolygon(rectGameObj2.x, rectGameObj2.y, rectGameObj2.width, rectGameObj2.height, false);
+        xuanDef = createPolygon(xuanZhuan.x, xuanZhuan.y, xuanZhuan.width, xuanZhuan.height, false);
+        xuanDef2 = createPolygon(xuanZhuan2.x, xuanZhuan2.y, xuanZhuan2.width, xuanZhuan2.height, true);
+
+        addGameBodyBind(xuanZhuan,xuanDef);
+        addGameBodyBind(xuanZhuan2,xuanDef2);
         addGameBodyBind(rectGameObj,createPolygon(rectGameObj.x,rectGameObj.y,rectGameObj.width,rectGameObj.height,true));
         addGameBodyBind(circleGameObj,circleDef);
         addGameBodyBind(imgGameObj,polygon2);
@@ -149,7 +175,18 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         lineGameObj.distanceJoint=joint;
         lineGameObj.rate=RATE;
 
+        addBodyMaDa();
+
         world.setContactListener(this);
+    }
+
+    private void addBodyMaDa() {
+        RevoluteJointDef revoluteJointDef=new RevoluteJointDef();
+        revoluteJointDef.initialize(xuanDef,xuanDef2,xuanDef.getWorldCenter());
+        revoluteJointDef.maxMotorTorque=100;//扭矩
+        revoluteJointDef.motorSpeed=10;//速度
+        revoluteJointDef.enableMotor=true;//启动
+        xuanJoin = (RevoluteJoint) world.createJoint(revoluteJointDef);
     }
 
     private void addBodyJoin() {
