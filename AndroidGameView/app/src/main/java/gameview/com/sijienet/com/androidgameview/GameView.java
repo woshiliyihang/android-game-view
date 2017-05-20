@@ -2,18 +2,24 @@ package gameview.com.sijienet.com.androidgameview;
 
 import android.content.Context;
 import android.util.AttributeSet;
+import android.util.Log;
+import android.view.MotionEvent;
+import android.view.View;
 
 import org.jbox2d.collision.AABB;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.ContactListener;
 import org.jbox2d.dynamics.World;
+import org.jbox2d.dynamics.contacts.ContactPoint;
+import org.jbox2d.dynamics.contacts.ContactResult;
 
 import gameview.com.sijienet.com.androidgameviewbase.AndroidGameViewBase;
 
 /**
  * Created by user on 2017/5/19.
  */
-public class GameView extends AndroidGameViewBase {
+public class GameView extends AndroidGameViewBase implements View.OnClickListener, ContactListener {
 
     public static final String tag="GameView";
 
@@ -48,6 +54,7 @@ public class GameView extends AndroidGameViewBase {
     public void init() {
         setKeepScreenOn(true);
         setFocusable(true);
+        setOnClickListener(this);
 
         qiuGameObj = new BitmapGameObj(getContext());
         addGameObj(qiuGameObj);
@@ -57,12 +64,12 @@ public class GameView extends AndroidGameViewBase {
         qiuGameObj.isVisible=true;
         imgGameObj = new RectGameObj(getContext());
         addGameObj(imgGameObj);
-        imgGameObj.index=1;
+        imgGameObj.index=5;
         imgGameObj.x=(screenWitdh-imgGameObj.width)/2;
-        imgGameObj.y=20;
+        imgGameObj.y=-400;
         qiuGameObj2 = new BitmapGameObj(getContext());
         addGameObj(qiuGameObj2);
-        qiuGameObj2.index=2;
+        qiuGameObj2.index=0;
         qiuGameObj2.x=(screenWitdh-qiuGameObj2.width)/2;
         qiuGameObj2.y=900;
         lineBody = new LineBody(getContext());
@@ -93,6 +100,17 @@ public class GameView extends AndroidGameViewBase {
         addGameBodyBind(qiuGameObj,body);
         addGameBodyBind(qiuGameObj2, polygon);
         addGameBodyBind(lineBody,polygonForLine);
+
+        //彭转检测
+        imgGameObj.body.getShapeList().getFilterData().groupIndex=3;
+        imgGameObj.body.getShapeList().getFilterData().maskBits=4;//指定我要碰你
+
+        qiuGameObj2.body.getShapeList().getFilterData().categoryBits=4;
+        qiuGameObj2.body.getShapeList().getFilterData().groupIndex=4;
+
+
+
+        world.setContactListener(this);
     }
 
     @Override
@@ -106,6 +124,7 @@ public class GameView extends AndroidGameViewBase {
             }
         });
     }
+
 
     @Override
     public float getRate() {
@@ -122,7 +141,34 @@ public class GameView extends AndroidGameViewBase {
     }
 
 
+    @Override
+    public void onClick(View v) {
+        imgGameObj.body.applyForce(new Vec2(0,-5000),imgGameObj.body.getWorldCenter());
+        Log.i(tag,"touch");
+    }
 
+    @Override
+    public void add(ContactPoint contactPoint) {
+        //每当有碰撞会调用此函数添加新的接触点
+        Log.i(tag,"add=="+contactPoint.toString());
+    }
 
+    @Override
+    public void persist(ContactPoint contactPoint) {
+        // 持续碰撞调用此函数
+        Log.i(tag,"persist=="+contactPoint.toString());
+    }
 
+    @Override
+    public void remove(ContactPoint contactPoint) {
+        //脱离碰撞调用此函
+        Log.i(tag,"remove=="+contactPoint.toString());
+    }
+
+    @Override
+    public void result(ContactResult contactResult) {
+        // 发生碰撞（有新的接触点被监听到）会调用此函数
+        // 持续碰撞时也会调用此函数
+        Log.i(tag,"result=="+contactResult.toString());
+    }
 }

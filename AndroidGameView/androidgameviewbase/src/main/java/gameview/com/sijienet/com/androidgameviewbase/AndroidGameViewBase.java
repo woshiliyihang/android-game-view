@@ -89,6 +89,7 @@ public abstract class AndroidGameViewBase extends View {
 
     public void addGameBodyBind(GameObj gameObj,Body body){
         gameObj.body=body;
+        body.m_userData=gameObj;
         BodyBind bodyBind = new BodyBind(body,gameObj);
         if (! bodyBinds.contains(bodyBind))
         {
