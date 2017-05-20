@@ -1,13 +1,22 @@
 package gameview.com.sijienet.com.androidgameviewbase;
 
 import android.animation.ValueAnimator;
+import android.annotation.TargetApi;
 import android.content.Context;
 import android.graphics.Canvas;
+import android.os.Build;
 import android.os.Handler;
 import android.util.AttributeSet;
 import android.util.DisplayMetrics;
 import android.view.View;
 import android.view.WindowManager;
+
+import org.jbox2d.collision.CircleDef;
+import org.jbox2d.collision.PolygonDef;
+import org.jbox2d.common.Vec2;
+import org.jbox2d.dynamics.Body;
+import org.jbox2d.dynamics.BodyDef;
+import org.jbox2d.dynamics.World;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -19,6 +28,18 @@ public abstract class AndroidGameViewBase extends View {
 
     private ArrayList<GameObj> gameObjs=new ArrayList<>();
     public Handler handler=new Handler();
+
+    private ArrayList<BodyBind> bodyBinds=new ArrayList<>();
+
+    public static class BodyBind{
+        public Body body;
+        public GameObj gameObj;
+
+        public BodyBind(Body body, GameObj gameObj) {
+            this.body = body;
+            this.gameObj = gameObj;
+        }
+    }
 
     public int screenWitdh;
     public int screenHeight;
@@ -66,6 +87,27 @@ public abstract class AndroidGameViewBase extends View {
         }
     }
 
+    public void addGameBodyBind(GameObj gameObj,Body body){
+        gameObj.body=body;
+        BodyBind bodyBind = new BodyBind(body,gameObj);
+        if (! bodyBinds.contains(bodyBind))
+        {
+            bodyBinds.add(bodyBind);
+        }
+    }
+
+    public void bindGameBody(float timeStep, int iterations){
+        getWorld().step(timeStep,iterations);//模拟运算
+        for (BodyBind bodyBind : bodyBinds) {
+            bindGameObjBody(bodyBind.gameObj, bodyBind.body);
+        }
+    }
+
+    public ArrayList<GameObj> getGameObjs() {
+        return gameObjs;
+    }
+
+    @TargetApi(Build.VERSION_CODES.N)
     public void useSort(){
         gameObjs.sort(new Comparator<GameObj>() {
             @Override
@@ -104,6 +146,8 @@ public abstract class AndroidGameViewBase extends View {
 
     public abstract void init();
     public abstract void start();
+    public abstract float getRate();
+    public abstract World getWorld();
 
     public ValueAnimator startAnim(final OnUpdateAnimer updateAnimer, int time, int... val){
         return startAnim(this, updateAnimer, time, val);
@@ -122,5 +166,84 @@ public abstract class AndroidGameViewBase extends View {
         });
         return valueAnimator;
     }
+
+    public void bindGameObjBody(GameObj gameObj,Body body){
+        Vec2 position2 = body.getPosition();
+        gameObj.x = position2.x*getRate() - gameObj.width/2;
+        gameObj.y = position2.y*getRate() - gameObj.height/2;
+    }
+
+    public Body createPolygon(float x, float y, float width, float height, boolean isStatic) {
+        // ---创建多边形皮肤
+        PolygonDef pd = new PolygonDef(); // 实例一个多边形的皮肤
+        if (isStatic) {
+            pd.density = 0; // 设置多边形为静态
+        } else {
+            pd.density = 1; // 设置多边形的质量
+        }
+        pd.friction = 0.8f; // 设置多边形的摩擦力
+        pd.restitution = 0.3f; // 设置多边形的恢复力
+        // 设置多边形快捷成盒子(矩形)
+        // 两个参数为多边形宽高的一半
+        pd.setAsBox(width / 2 / getRate(), height / 2 / getRate());
+        // ---创建刚体
+        BodyDef bd = new BodyDef(); // 实例一个刚体对象
+        bd.position.set((x + width / 2) / getRate(), (y + height / 2) / getRate());// 设置刚体的坐标
+        // ---创建Body（物体）
+        Body body = getWorld().createBody(bd); // 物理世界创建物体
+        body.createShape(pd); // 为Body添加皮肤
+        body.setMassFromShapes(); // 将整个物体计算打包
+        return body;
+    }
+
+    public Body createCircleDef(float x, float y, float r, boolean isStatic) {
+        // ---创建多边形皮肤
+        CircleDef pd = new CircleDef(); // 实例一个多边形的皮肤
+        if (isStatic) {
+            pd.density = 0; // 设置多边形为静态
+        } else {
+            pd.density = 1; // 设置多边形的质量
+        }
+        pd.friction = 0.8f; // 设置多边形的摩擦力
+        pd.restitution = 0.3f; // 设置多边形的恢复力
+        // 设置多边形快捷成盒子(矩形)
+        // 两个参数为多边形宽高的一半
+        pd.radius=r/getRate();
+        // ---创建刚体
+        BodyDef bd = new BodyDef(); // 实例一个刚体对象
+        bd.position.set((x + r) / getRate(), (y + r) / getRate());// 设置刚体的坐标
+        // ---创建Body（物体）
+        Body body = getWorld().createBody(bd); // 物理世界创建物体
+        body.createShape(pd); // 为Body添加皮肤
+        body.setMassFromShapes(); // 将整个物体计算打包
+        return body;
+    }
+
+    public Body createPolygonForLine(float x, float y, float width, float height, boolean isStatic) {
+        // ---创建多边形皮肤
+        PolygonDef pd = new PolygonDef(); // 实例一个多边形的皮肤
+        if (isStatic) {
+            pd.density = 0; // 设置多边形为静态
+        } else {
+            pd.density = 1; // 设置多边形的质量
+        }
+        pd.friction = 0.8f; // 设置多边形的摩擦力
+        pd.restitution = 0.3f; // 设置多边形的恢复力
+        // 设置多边形快捷成盒子(矩形)
+        // 两个参数为多边形宽高的一半
+        float v = width / 2 / getRate();
+        pd.addVertex(new Vec2(-1*v,-1*v));
+        pd.addVertex(new Vec2(1*v,-1*v));
+        pd.addVertex(new Vec2(0,1*v));
+        // ---创建刚体
+        BodyDef bd = new BodyDef(); // 实例一个刚体对象
+        bd.position.set((x + width / 2) / getRate(), (y + height / 2) / getRate());// 设置刚体的坐标
+        // ---创建Body（物体）
+        Body body = getWorld().createBody(bd); // 物理世界创建物体
+        body.createShape(pd); // 为Body添加皮肤
+        body.setMassFromShapes(); // 将整个物体计算打包
+        return body;
+    }
+
 
 }

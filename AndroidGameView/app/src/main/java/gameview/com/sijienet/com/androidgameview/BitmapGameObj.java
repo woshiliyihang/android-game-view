@@ -11,20 +11,26 @@ import gameview.com.sijienet.com.androidgameviewbase.GameObj;
 /**
  * Created by user on 2017/5/19.
  */
-public class QiuGameObj extends GameObj {
+public class BitmapGameObj extends GameObj {
 
-    Bitmap img;
+    public Bitmap img;
 
-    public QiuGameObj(Context context) {
+    public BitmapGameObj(Context context) {
         super(context);
         setAntiAlias(true);
         setStrokeWidth(1);
         setColor(Color.RED);
-        img = BitmapFactory.decodeResource(context.getResources(),R.mipmap.ic_launcher);
+        img = BitmapFactory.decodeResource(context.getResources(),R.drawable.touxiang);
+        width=img.getWidth();
+        height=img.getHeight();
     }
 
     @Override
     public void drawSelf(Canvas canvas) {
-        canvas.drawBitmap(img, x,y,this);
+        canvas.save();
+        canvas.rotate((float) (body.getAngle()*180f/Math.PI),x+width/2,y+height/2);
+        canvas.drawBitmap(img,x,y,this);
+        canvas.restore();
     }
+
 }
