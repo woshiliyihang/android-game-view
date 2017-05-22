@@ -10,6 +10,7 @@ import android.view.MotionEvent;
 import android.view.View;
 
 import org.jbox2d.collision.AABB;
+import org.jbox2d.collision.Shape;
 import org.jbox2d.common.Vec2;
 import org.jbox2d.dynamics.Body;
 import org.jbox2d.dynamics.ContactListener;
@@ -77,6 +78,7 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
     private float touchX;
     private float touchY;
     private Paint paint;
+    private AABB aabb1;
 
     public GameView(Context context) {
         super(context);
@@ -100,6 +102,8 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         paint.setAntiAlias(true);
         paint.setStrokeWidth(10);
         paint.setColor(Color.BLACK);
+
+        aabb1 = new AABB();
 
         qiuGameObj = new BitmapGameObj(getContext());
         addGameObj(qiuGameObj);
@@ -307,6 +311,12 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         touchY = event.getY();
         polygon2.wakeUp();
         mouseJoint.m_target.set(touchX/RATE,touchY/RATE);
+
+        //通过aabb 查找内容body 数量
+        aabb1.lowerBound.set(touchX/RATE,touchY/RATE);
+        aabb1.upperBound.set((touchX+100)/RATE,(touchY+100)/RATE);
+        Shape[] query = world.query(aabb1, 100);
+        Log.i("mytool","body size=="+query.length);
         return super.onTouchEvent(event);
     }
 
@@ -314,6 +324,7 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
         canvas.drawLine(mouseJoint.m_target.x*RATE,mouseJoint.m_target.y*RATE, polygon2.getWorldCenter().x*RATE, polygon2.getWorldCenter().y*RATE, paint);
+        canvas.drawRect(touchX,touchY,touchX+100, touchY+100,paint);
     }
 
     //鼠标移动移动关节
