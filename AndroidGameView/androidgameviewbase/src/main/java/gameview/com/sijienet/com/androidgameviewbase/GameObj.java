@@ -2,6 +2,7 @@ package gameview.com.sijienet.com.androidgameviewbase;
 
 import android.content.Context;
 import android.graphics.Canvas;
+import android.graphics.Color;
 import android.graphics.Paint;
 
 import org.jbox2d.dynamics.Body;
@@ -24,6 +25,9 @@ public abstract class GameObj extends Paint {
 
     public GameObj(Context context) {
         this.context = context;
+        setAntiAlias(true);
+        setColor(Color.BLACK);
+        setStrokeWidth(10);
     }
 
     public abstract void drawSelf(Canvas canvas);

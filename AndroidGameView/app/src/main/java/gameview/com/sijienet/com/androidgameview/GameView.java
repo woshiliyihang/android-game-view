@@ -16,6 +16,8 @@ import org.jbox2d.dynamics.joints.DistanceJoint;
 import org.jbox2d.dynamics.joints.DistanceJointDef;
 import org.jbox2d.dynamics.joints.GearJoint;
 import org.jbox2d.dynamics.joints.GearJointDef;
+import org.jbox2d.dynamics.joints.Joint;
+import org.jbox2d.dynamics.joints.PulleyJointDef;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
 
@@ -54,6 +56,11 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
     private Body xuanDef3;
     private RectGameObj xuanZhuan4;
     private Body xuanDef4;
+    private RectGameObj huanLun1;
+    private Body huaLunDef1;
+    private RectGameObj huanLun2;
+    private Body huaLunDef2;
+    private HuaLunDrawLine huanLun3;
 
     public GameView(Context context) {
         super(context);
@@ -149,6 +156,27 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         xuanZhuan4.height=10;
         addGameObj(xuanZhuan4);
 
+        huanLun1 = new RectGameObj(getContext());
+        huanLun1.width=100;
+        huanLun1.height=200;
+        huanLun1.x=(screenWitdh-huanLun1.width)/2;
+        huanLun1.y=1700;
+        addGameObj(huanLun1);
+
+        huanLun2 = new RectGameObj(getContext());
+        huanLun2.width=100;
+        huanLun2.height=100;
+        huanLun2.x=(screenWitdh-huanLun2.width)/2+300;
+        huanLun2.y=1700;
+        addGameObj(huanLun2);
+
+        huanLun3 = new HuaLunDrawLine(getContext());
+        huanLun3.width=100;
+        huanLun3.height=100;
+        huanLun3.x=(screenWitdh-huanLun2.width)/2+300;
+        huanLun3.y=1700;
+        addGameObj(huanLun3);
+
         useSort();
 
         //设置物理世界
@@ -170,7 +198,11 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         xuanDef2 = createPolygon(xuanZhuan2.x, xuanZhuan2.y, xuanZhuan2.width, xuanZhuan2.height, true);
         xuanDef3 = createPolygon(xuanZhuan3.x, xuanZhuan3.y, xuanZhuan3.width, xuanZhuan3.height, false);
         xuanDef4 = createPolygon(xuanZhuan4.x, xuanZhuan4.y, xuanZhuan4.width, xuanZhuan4.height, false);
+        huaLunDef1 = createPolygon(huanLun1.x, huanLun1.y, huanLun1.width, huanLun1.height, false);
+        huaLunDef2 = createPolygon(huanLun2.x, huanLun2.y, huanLun2.width, huanLun2.height, false);
 
+        addGameBodyBind(huanLun2,huaLunDef2);
+        addGameBodyBind(huanLun1, huaLunDef1);
         addGameBodyBind(xuanZhuan4,xuanDef4);
         addGameBodyBind(xuanZhuan3,xuanDef3);
         addGameBodyBind(xuanZhuan,xuanDef);
@@ -183,6 +215,12 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         addGameBodyBind(lineBody,polygonForLine);
         addGameBodyBind(rectGameObj1, topDef);
         addGameBodyBind(rectGameObj2,bottomDef);
+
+        //赋值
+        huanLun3.body=huaLunDef1;
+        huanLun3.body2=huaLunDef2;
+        huanLun3.screentWidth=screenWitdh;
+        huanLun3.RATE=RATE;
 
         //彭转检测
         imgGameObj.body.getShapeList().getFilterData().groupIndex=3;
@@ -204,7 +242,19 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         //齿轮关节
         chaLun(revoluteJoint,revoluteJoint1);
 
+        huaLunDouble();
+
         world.setContactListener(this);
+    }
+
+
+    //双还轮方式
+    private void huaLunDouble(){
+        PulleyJointDef pulleyJointDef=new PulleyJointDef();
+        Vec2 vec2=new Vec2((huanLun1.x+huanLun1.width/2)/RATE, (huanLun1.y-300)/RATE);
+        Vec2 vec21=new Vec2( (huanLun2.x+huanLun1.width/2)/RATE, (huanLun2.y-300)/RATE );
+        pulleyJointDef.initialize(huaLunDef1,huaLunDef2,vec2,vec21,huaLunDef1.getWorldCenter(),huaLunDef2.getWorldCenter(),1f);
+        Joint joint = world.createJoint(pulleyJointDef);
     }
 
     private void chaLun(RevoluteJoint revoluteJoint, RevoluteJoint revoluteJoint1) {

@@ -18,7 +18,7 @@ public class RectGameObj extends GameObj {
         setAntiAlias(true);
         setColor(Color.RED);
         setTextSize(50);
-        setStrokeWidth(10);
+        setStrokeWidth(20);
         setStyle(Style.FILL);
         width = 80;
         height = 50;
