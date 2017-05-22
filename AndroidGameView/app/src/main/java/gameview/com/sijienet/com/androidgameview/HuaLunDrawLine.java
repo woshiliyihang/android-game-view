@@ -21,6 +21,7 @@ public class HuaLunDrawLine extends GameObj {
     public HuaLunDrawLine(Context context) {
         super(context);
         setColor(Color.BLUE);
+        setStrokeWidth(2);
     }
 
     @Override

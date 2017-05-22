@@ -183,7 +183,7 @@ public abstract class AndroidGameViewBase extends View {
             pd.density = 1; // 设置多边形的质量
         }
         pd.friction = 0.8f; // 设置多边形的摩擦力
-        pd.restitution = 0.3f; // 设置多边形的恢复力
+        pd.restitution = 0.4f; // 设置多边形的恢复力
         // 设置多边形快捷成盒子(矩形)
         // 两个参数为多边形宽高的一半
         pd.setAsBox(width / 2 / getRate(), height / 2 / getRate());
@@ -206,7 +206,7 @@ public abstract class AndroidGameViewBase extends View {
             pd.density = 1; // 设置多边形的质量
         }
         pd.friction = 0.8f; // 设置多边形的摩擦力
-        pd.restitution = 0.3f; // 设置多边形的恢复力
+        pd.restitution = 0.4f; // 设置多边形的恢复力
         // 设置多边形快捷成盒子(矩形)
         // 两个参数为多边形宽高的一半
         pd.radius=r/getRate();
@@ -229,7 +229,7 @@ public abstract class AndroidGameViewBase extends View {
             pd.density = 1; // 设置多边形的质量
         }
         pd.friction = 0.8f; // 设置多边形的摩擦力
-        pd.restitution = 0.3f; // 设置多边形的恢复力
+        pd.restitution = 0.4f; // 设置多边形的恢复力
         // 设置多边形快捷成盒子(矩形)
         // 两个参数为多边形宽高的一半
         float v = width / 2 / getRate();

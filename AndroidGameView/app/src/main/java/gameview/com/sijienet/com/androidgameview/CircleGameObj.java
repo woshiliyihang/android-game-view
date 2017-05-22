@@ -11,6 +11,8 @@ import gameview.com.sijienet.com.androidgameviewbase.GameObj;
  */
 public class CircleGameObj extends GameObj {
 
+    public float radius;
+
     public CircleGameObj(Context context) {
         super(context);
         setAntiAlias(true);

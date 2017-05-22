@@ -181,7 +181,7 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
 
         //设置物理世界
         AABB aabb = new AABB();
-        Vec2 gravity = new Vec2(0f, 10f);
+        Vec2 gravity = new Vec2(0f, 200f);
         aabb.lowerBound.set(-100f, -100f);
         aabb.upperBound.set(100f, 100f);
         world = new World(aabb, gravity, true);
