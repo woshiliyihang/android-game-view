@@ -1,8 +1,12 @@
 package gameview.com.sijienet.com.androidgameview;
 
 import android.content.Context;
+import android.graphics.Canvas;
+import android.graphics.Color;
+import android.graphics.Paint;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.view.MotionEvent;
 import android.view.View;
 
 import org.jbox2d.collision.AABB;
@@ -17,6 +21,10 @@ import org.jbox2d.dynamics.joints.DistanceJointDef;
 import org.jbox2d.dynamics.joints.GearJoint;
 import org.jbox2d.dynamics.joints.GearJointDef;
 import org.jbox2d.dynamics.joints.Joint;
+import org.jbox2d.dynamics.joints.MouseJoint;
+import org.jbox2d.dynamics.joints.MouseJointDef;
+import org.jbox2d.dynamics.joints.PrismaticJoint;
+import org.jbox2d.dynamics.joints.PrismaticJointDef;
 import org.jbox2d.dynamics.joints.PulleyJointDef;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
 import org.jbox2d.dynamics.joints.RevoluteJointDef;
@@ -61,6 +69,14 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
     private RectGameObj huanLun2;
     private Body huaLunDef2;
     private HuaLunDrawLine huanLun3;
+    private RectGameObj moveObj;
+    private Body moveObjBody;
+    private RectGameObj moveObj2;
+    private Body moveObjBody2;
+    private MouseJoint mouseJoint;
+    private float touchX;
+    private float touchY;
+    private Paint paint;
 
     public GameView(Context context) {
         super(context);
@@ -79,6 +95,11 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         setKeepScreenOn(true);
         setFocusable(true);
         setOnClickListener(this);
+
+        paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setStrokeWidth(10);
+        paint.setColor(Color.BLACK);
 
         qiuGameObj = new BitmapGameObj(getContext());
         addGameObj(qiuGameObj);
@@ -177,11 +198,28 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         huanLun3.y=1700;
         addGameObj(huanLun3);
 
+        moveObj = new RectGameObj(getContext());
+        moveObj.width=100;
+        moveObj.height=100;
+        moveObj.x=570;
+        moveObj.y=0;
+        addGameObj(moveObj);
+
+        moveObj2 = new RectGameObj(getContext());
+        moveObj2.width=120;
+        moveObj2.height=100;
+        moveObj2.x=560;
+        moveObj2.y=140;
+        addGameObj(moveObj2);
+
+        MoveLine moveLine = new MoveLine(getContext());
+        addGameObj(moveLine);
+
         useSort();
 
         //设置物理世界
         AABB aabb = new AABB();
-        Vec2 gravity = new Vec2(0f, 200f);
+        Vec2 gravity = new Vec2(0f, 10f);
         aabb.lowerBound.set(-100f, -100f);
         aabb.upperBound.set(100f, 100f);
         world = new World(aabb, gravity, true);
@@ -200,7 +238,11 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         xuanDef4 = createPolygon(xuanZhuan4.x, xuanZhuan4.y, xuanZhuan4.width, xuanZhuan4.height, false);
         huaLunDef1 = createPolygon(huanLun1.x, huanLun1.y, huanLun1.width, huanLun1.height, false);
         huaLunDef2 = createPolygon(huanLun2.x, huanLun2.y, huanLun2.width, huanLun2.height, false);
+        moveObjBody = createPolygon(moveObj.x, moveObj.y, moveObj.width, moveObj.height, false);
+        moveObjBody2 = createPolygon(moveObj2.x, moveObj2.y, moveObj2.width, moveObj2.height, false);
 
+        addGameBodyBind(moveObj2,moveObjBody2);
+        addGameBodyBind(moveObj,moveObjBody);
         addGameBodyBind(huanLun2,huaLunDef2);
         addGameBodyBind(huanLun1, huaLunDef1);
         addGameBodyBind(xuanZhuan4,xuanDef4);
@@ -217,6 +259,9 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         addGameBodyBind(rectGameObj2,bottomDef);
 
         //赋值
+        moveLine.moveObjDef2=moveObjBody2;
+        moveLine.moveObjDef=moveObjBody;
+        moveLine.rate=RATE;
         huanLun3.body=huaLunDef1;
         huanLun3.body2=huaLunDef2;
         huanLun3.screentWidth=screenWitdh;
@@ -242,9 +287,76 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         //齿轮关节
         chaLun(revoluteJoint,revoluteJoint1);
 
+        //滑轮关节
         huaLunDouble();
 
+        //移动关节
+//        moveJoint();
+        moveJoint2();
+
+        //添加点击关节
+        MouseJoint mouseJoint = getMouseJoint();
+
         world.setContactListener(this);
+    }
+
+
+    @Override
+    public boolean onTouchEvent(MotionEvent event) {
+        touchX = event.getX();
+        touchY = event.getY();
+        polygon2.wakeUp();
+        mouseJoint.m_target.set(touchX/RATE,touchY/RATE);
+        return super.onTouchEvent(event);
+    }
+
+    @Override
+    protected void onDraw(Canvas canvas) {
+        super.onDraw(canvas);
+        canvas.drawLine(mouseJoint.m_target.x*RATE,mouseJoint.m_target.y*RATE, polygon2.getWorldCenter().x*RATE, polygon2.getWorldCenter().y*RATE, paint);
+    }
+
+    //鼠标移动移动关节
+    private MouseJoint getMouseJoint(){
+        MouseJointDef mouseJointDef=new MouseJointDef();
+        mouseJointDef.body1=world.getGroundBody();
+        mouseJointDef.body2=polygon2;
+        mouseJointDef.target.x= mouseJointDef.body2.getPosition().x;
+        mouseJointDef.target.y= mouseJointDef.body2.getPosition().y;
+        mouseJointDef.maxForce=100f;//拉力
+        mouseJoint= (MouseJoint) world.createJoint(mouseJointDef);
+        mouseJoint.m_gamma=20;//弹力
+        mouseJoint.m_target.set(600/RATE, 100/RATE);
+        return mouseJoint;
+    }
+
+    //相对于墙壁的移动关节
+    private void moveJoint() {
+        PrismaticJointDef prismaticJointDef=new PrismaticJointDef();
+        prismaticJointDef.maxMotorForce=90;//最大马力
+        prismaticJointDef.motorSpeed=10;//最大玛丽
+        prismaticJointDef.enableMotor=true;
+        float moveMax=720f;
+        prismaticJointDef.lowerTranslation=-moveMax/RATE;// 设置位移最小偏移值
+        prismaticJointDef.upperTranslation=moveMax/RATE;//设置位移最大偏移值
+        prismaticJointDef.enableLimit=true;//开启限制
+        prismaticJointDef.initialize(world.getGroundBody(),moveObjBody,moveObjBody.getWorldCenter(),new Vec2(1,0));
+        Joint joint = world.createJoint(prismaticJointDef);
+    }
+
+    //移动关节
+    private void moveJoint2() {
+        PrismaticJointDef prismaticJointDef=new PrismaticJointDef();
+        prismaticJointDef.maxMotorForce=10;//最大马力
+        prismaticJointDef.motorSpeed=10;//最大玛丽
+        prismaticJointDef.enableMotor=true;
+        float moveMax=20;
+        prismaticJointDef.lowerTranslation=-moveMax/RATE;// 设置位移最小偏移值
+        prismaticJointDef.upperTranslation=moveMax/RATE;//设置位移最大偏移值
+        prismaticJointDef.enableLimit=true;//开启限制
+        Vec2 vec2 = new Vec2(1, 0);//设置伸缩方向还是左右方向 当前左右方向
+        prismaticJointDef.initialize(moveObjBody,moveObjBody2,moveObjBody.getWorldCenter(),vec2);
+        Joint joint = world.createJoint(prismaticJointDef);
     }
 
 
