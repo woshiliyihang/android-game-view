@@ -1,1 +1,1 @@
-include ':app', ':androidgameviewbase'
+include ':app', ':lib_game_view'
