@@ -4,8 +4,6 @@ import android.content.Context;
 import android.graphics.Canvas;
 import android.graphics.Color;
 import android.graphics.Paint;
-import android.provider.UserDictionary;
-import android.util.AttributeSet;
 import android.util.Log;
 import android.view.MotionEvent;
 import android.view.View;
@@ -25,7 +23,6 @@ import org.jbox2d.dynamics.joints.GearJointDef;
 import org.jbox2d.dynamics.joints.Joint;
 import org.jbox2d.dynamics.joints.MouseJoint;
 import org.jbox2d.dynamics.joints.MouseJointDef;
-import org.jbox2d.dynamics.joints.PrismaticJoint;
 import org.jbox2d.dynamics.joints.PrismaticJointDef;
 import org.jbox2d.dynamics.joints.PulleyJointDef;
 import org.jbox2d.dynamics.joints.RevoluteJoint;
@@ -40,14 +37,14 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
 
     public static final String tag="GameView";
 
-    private BitmapGameObj qiuGameObj;
-    private RectGameObj imgGameObj;
+    private BitmapGameObj mBallTypeGameObj;
+    private RectGameObj mImgGameObj;
     private World world;
     private float timeStep=1f / 60f;//模式真实世界频率
     private int iterations=10;//计算频率 越大越精确
     private final float RATE=30f;//现实世界与屏幕比例 30px : 1m
     private Body body;
-    private BitmapGameObj qiuGameObj2;
+    private BitmapGameObj mBallTypeGameObj2;
     private Body polygon;
     private Body polygon2;
     private LineBody lineBody;
@@ -57,227 +54,70 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
     private Body topDef;
     private Body bottomDef;
     private DistanceJoint joint;
-    private RectGameObj xuanZhuan;
-    private RectGameObj xuanZhuan2;
-    private Body xuanDef;
-    private Body xuanDef2;
-    private RevoluteJoint xuanJoin;
-    private RectGameObj xuanZhuan3;
-    private Body xuanDef3;
-    private RectGameObj xuanZhuan4;
-    private Body xuanDef4;
-    private RectGameObj huanLun1;
-    private Body huaLunDef1;
-    private RectGameObj huanLun2;
-    private Body huaLunDef2;
-    private HuaLunDrawLine huanLun3;
-    private RectGameObj moveObj;
-    private Body moveObjBody;
-    private RectGameObj moveObj2;
-    private Body moveObjBody2;
+    private RectGameObj mRotateGameObj;
+    private RectGameObj mRotateGameObj2;
+    private Body mRotateDef;
+    private Body mRotateDef2;
+    private RevoluteJoint rotateJoint;
+    private RectGameObj mRotateGameObj3;
+    private Body mRotateDef3;
+    private RectGameObj mRotateGameObj4;
+    private Body mRotateDef4;
+    private RectGameObj mPulleyGameObj1;
+    private Body mPulleyDef1;
+    private RectGameObj mPulleyGameObj2;
+    private Body mPulleyDef2;
+    private PulleyLine mPulleyLine3;
+    private RectGameObj mMoveGameObj;
+    private Body mMoveDef;
+    private RectGameObj mRectGameObj2;
+    private Body mMoveDef2;
     private MouseJoint mouseJoint;
     private float touchX;
     private float touchY;
     private Paint paint;
     private AABB aabb1;
+    private RectGameObj mRectGameObj1;
+    private RectGameObj rectGameObj2;
+    private RectGameObj mRectGameObj;
+    private MoveLine mMoveLine;
+    private LineGameObj lineGameObj;
 
     public GameView(Context context) {
         super(context);
     }
 
-    public GameView(Context context, AttributeSet attrs) {
-        super(context, attrs);
-    }
-
-    public GameView(Context context, AttributeSet attrs, int defStyleAttr) {
-        super(context, attrs, defStyleAttr);
-    }
-
     @Override
     public void init() {
-        setKeepScreenOn(true);
-        setFocusable(true);
-        setOnClickListener(this);
+        initConfig();
 
-        paint = new Paint();
-        paint.setAntiAlias(true);
-        paint.setStrokeWidth(10);
-        paint.setColor(Color.BLACK);
+        world=initBox2dWorld(new Vec2(0f, 10f));
 
-        aabb1 = new AABB();
-
-        qiuGameObj = new BitmapGameObj(getContext());
-        addGameObj(qiuGameObj);
-        qiuGameObj.x=(screenWitdh-qiuGameObj.width)/2;
-        qiuGameObj.y=50;
-        qiuGameObj.index=2;
-        qiuGameObj.isVisible=true;
-        imgGameObj = new RectGameObj(getContext());
-        addGameObj(imgGameObj);
-        imgGameObj.index=5;
-        imgGameObj.x=(screenWitdh-imgGameObj.width)/2;
-        imgGameObj.y=-400;
-        qiuGameObj2 = new BitmapGameObj(getContext());
-        addGameObj(qiuGameObj2);
-        qiuGameObj2.index=0;
-        qiuGameObj2.x=(screenWitdh-qiuGameObj2.width)/2;
-        qiuGameObj2.y=900;
-        lineBody = new LineBody(getContext());
-        addGameObj(lineBody);
-        lineBody.x=(screenWitdh-lineBody.width)/2;
-        lineBody.y=0;
-        circleGameObj = new CircleGameObj(getContext());
-        addGameObj(circleGameObj);
-        circleGameObj.x=(screenWitdh-circleGameObj.width)/2;
-        circleGameObj.y=0;
-        RectGameObj rectGameObj = new RectGameObj(getContext());
-        addGameObj(rectGameObj);
-        rectGameObj.x=0;
-        rectGameObj.y=300;
-        rectGameObj.width=200;
-        rectGameObj.height=10;
-        RectGameObj rectGameObj1 = new RectGameObj(getContext());
-        rectGameObj1.x=0;
-        rectGameObj1.y=250;
-        rectGameObj1.width=100;
-        rectGameObj1.height=10;
-        addGameObj(rectGameObj1);
-
-        RectGameObj rectGameObj2 = new RectGameObj(getContext());
-        rectGameObj2.x=100;
-        rectGameObj2.y=600;
-        rectGameObj2.width=100;
-        rectGameObj2.height=20;
-        addGameObj(rectGameObj2);
-
-        LineGameObj lineGameObj = new LineGameObj(getContext());
-        addGameObj(lineGameObj);
-        lineGameObj.index=8;
-
-        xuanZhuan = new RectGameObj(getContext());
-        xuanZhuan.x=0;
-        xuanZhuan.y=805;
-        xuanZhuan.width=200;
-        xuanZhuan.height=10;
-        addGameObj(xuanZhuan);
-
-        xuanZhuan2 = new RectGameObj(getContext());
-        xuanZhuan2.x=0;
-        xuanZhuan2.y=800;
-        xuanZhuan2.width=200;
-        xuanZhuan2.height=20;
-        addGameObj(xuanZhuan2);
-
-        xuanZhuan3 = new RectGameObj(getContext());
-        xuanZhuan3.x=0;
-        xuanZhuan3.y=1205;
-        xuanZhuan3.width=200;
-        xuanZhuan3.height=10;
-        addGameObj(xuanZhuan3);
-
-        xuanZhuan4 = new RectGameObj(getContext());
-        xuanZhuan4.x=0;
-        xuanZhuan4.y=1705;
-        xuanZhuan4.width=200;
-        xuanZhuan4.height=10;
-        addGameObj(xuanZhuan4);
-
-        huanLun1 = new RectGameObj(getContext());
-        huanLun1.width=100;
-        huanLun1.height=200;
-        huanLun1.x=(screenWitdh-huanLun1.width)/2;
-        huanLun1.y=1700;
-        addGameObj(huanLun1);
-
-        huanLun2 = new RectGameObj(getContext());
-        huanLun2.width=100;
-        huanLun2.height=100;
-        huanLun2.x=(screenWitdh-huanLun2.width)/2+300;
-        huanLun2.y=1700;
-        addGameObj(huanLun2);
-
-        huanLun3 = new HuaLunDrawLine(getContext());
-        huanLun3.width=100;
-        huanLun3.height=100;
-        huanLun3.x=(screenWitdh-huanLun2.width)/2+300;
-        huanLun3.y=1700;
-        addGameObj(huanLun3);
-
-        moveObj = new RectGameObj(getContext());
-        moveObj.width=100;
-        moveObj.height=100;
-        moveObj.x=570;
-        moveObj.y=0;
-        addGameObj(moveObj);
-
-        moveObj2 = new RectGameObj(getContext());
-        moveObj2.width=120;
-        moveObj2.height=100;
-        moveObj2.x=560;
-        moveObj2.y=140;
-        addGameObj(moveObj2);
-
-        MoveLine moveLine = new MoveLine(getContext());
-        addGameObj(moveLine);
+        initGameObject();
 
         useSort();
 
-        //设置物理世界
-        AABB aabb = new AABB();
-        Vec2 gravity = new Vec2(0f, 10f);
-        aabb.lowerBound.set(-100f, -100f);
-        aabb.upperBound.set(100f, 100f);
-        world = new World(aabb, gravity, true);
+        initBodyDef();
 
-        //创建物体
-        body = createPolygon(this.qiuGameObj.x, this.qiuGameObj.y, this.qiuGameObj.img.getWidth(), this.qiuGameObj.img.getHeight(), false);
-        polygon = createPolygon(qiuGameObj2.x, qiuGameObj2.y, qiuGameObj2.img.getWidth(), qiuGameObj2.img.getHeight(), true);
-        polygon2 = createPolygon(imgGameObj.x, imgGameObj.y, imgGameObj.width, imgGameObj.height, false);
-        polygonForLine = createPolygonForLine( lineBody.x, lineBody.y, lineBody.width, lineBody.height, false);
-        circleDef = createCircleDef(circleGameObj.x, circleGameObj.y, circleGameObj.radius, false);
-        topDef = createPolygon(rectGameObj1.x, rectGameObj1.y, rectGameObj1.width, rectGameObj1.height, false);
-        bottomDef = createPolygon(rectGameObj2.x, rectGameObj2.y, rectGameObj2.width, rectGameObj2.height, false);
-        xuanDef = createPolygon(xuanZhuan.x, xuanZhuan.y, xuanZhuan.width, xuanZhuan.height, false);
-        xuanDef2 = createPolygon(xuanZhuan2.x, xuanZhuan2.y, xuanZhuan2.width, xuanZhuan2.height, true);
-        xuanDef3 = createPolygon(xuanZhuan3.x, xuanZhuan3.y, xuanZhuan3.width, xuanZhuan3.height, false);
-        xuanDef4 = createPolygon(xuanZhuan4.x, xuanZhuan4.y, xuanZhuan4.width, xuanZhuan4.height, false);
-        huaLunDef1 = createPolygon(huanLun1.x, huanLun1.y, huanLun1.width, huanLun1.height, false);
-        huaLunDef2 = createPolygon(huanLun2.x, huanLun2.y, huanLun2.width, huanLun2.height, false);
-        moveObjBody = createPolygon(moveObj.x, moveObj.y, moveObj.width, moveObj.height, false);
-        moveObjBody2 = createPolygon(moveObj2.x, moveObj2.y, moveObj2.width, moveObj2.height, false);
+        initLogic();
+    }
 
-        addGameBodyBind(moveObj2,moveObjBody2);
-        addGameBodyBind(moveObj,moveObjBody);
-        addGameBodyBind(huanLun2,huaLunDef2);
-        addGameBodyBind(huanLun1, huaLunDef1);
-        addGameBodyBind(xuanZhuan4,xuanDef4);
-        addGameBodyBind(xuanZhuan3,xuanDef3);
-        addGameBodyBind(xuanZhuan,xuanDef);
-        addGameBodyBind(xuanZhuan2,xuanDef2);
-        addGameBodyBind(rectGameObj,createPolygon(rectGameObj.x,rectGameObj.y,rectGameObj.width,rectGameObj.height,true));
-        addGameBodyBind(circleGameObj,circleDef);
-        addGameBodyBind(imgGameObj,polygon2);
-        addGameBodyBind(qiuGameObj,body);
-        addGameBodyBind(qiuGameObj2, this.polygon);
-        addGameBodyBind(lineBody,polygonForLine);
-        addGameBodyBind(rectGameObj1, topDef);
-        addGameBodyBind(rectGameObj2,bottomDef);
-
+    private void initLogic() {
         //赋值
-        moveLine.moveObjDef2=moveObjBody2;
-        moveLine.moveObjDef=moveObjBody;
-        moveLine.rate=RATE;
-        huanLun3.body=huaLunDef1;
-        huanLun3.body2=huaLunDef2;
-        huanLun3.screentWidth=screenWitdh;
-        huanLun3.RATE=RATE;
+        mMoveLine.moveObjDef2= mMoveDef2;
+        mMoveLine.moveObjDef= mMoveDef;
+        mMoveLine.rate=RATE;
+        mPulleyLine3.body= mPulleyDef1;
+        mPulleyLine3.body2= mPulleyDef2;
+        mPulleyLine3.screentWidth=screenWitdh;
+        mPulleyLine3.RATE=RATE;
 
         //彭转检测
-        imgGameObj.body.getShapeList().getFilterData().groupIndex=3;
-        imgGameObj.body.getShapeList().getFilterData().maskBits=4;//指定我要碰你
+        mImgGameObj.body.getShapeList().getFilterData().groupIndex=3;
+        mImgGameObj.body.getShapeList().getFilterData().maskBits=4;//指定我要碰你
 
-        qiuGameObj2.body.getShapeList().getFilterData().categoryBits=4;
-        qiuGameObj2.body.getShapeList().getFilterData().groupIndex=4;
+        mBallTypeGameObj2.body.getShapeList().getFilterData().categoryBits=4;
+        mBallTypeGameObj2.body.getShapeList().getFilterData().groupIndex=4;
 
         //添加关节
         addBodyJoin();
@@ -305,6 +145,173 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         world.setContactListener(this);
     }
 
+    private void initBodyDef() {
+        //创建形状
+        body = createPolygon(this.mBallTypeGameObj.x, this.mBallTypeGameObj.y, this.mBallTypeGameObj.img.getWidth(), this.mBallTypeGameObj.img.getHeight(), false);
+        polygon = createPolygon(mBallTypeGameObj2.x, mBallTypeGameObj2.y, mBallTypeGameObj2.img.getWidth(), mBallTypeGameObj2.img.getHeight(), true);
+        polygon2 = createPolygon(mImgGameObj.x, mImgGameObj.y, mImgGameObj.width, mImgGameObj.height, false);
+        polygonForLine = createPolygonForLine( lineBody.x, lineBody.y, lineBody.width, lineBody.height, false);
+        circleDef = createCircleDef(circleGameObj.x, circleGameObj.y, circleGameObj.radius, false);
+        topDef = createPolygon(mRectGameObj1.x, mRectGameObj1.y, mRectGameObj1.width, mRectGameObj1.height, false);
+        bottomDef = createPolygon(rectGameObj2.x, rectGameObj2.y, rectGameObj2.width, rectGameObj2.height, false);
+        mRotateDef = createPolygon(mRotateGameObj.x, mRotateGameObj.y, mRotateGameObj.width, mRotateGameObj.height, false);
+        mRotateDef2 = createPolygon(mRotateGameObj2.x, mRotateGameObj2.y, mRotateGameObj2.width, mRotateGameObj2.height, true);
+        mRotateDef3 = createPolygon(mRotateGameObj3.x, mRotateGameObj3.y, mRotateGameObj3.width, mRotateGameObj3.height, false);
+        mRotateDef4 = createPolygon(mRotateGameObj4.x, mRotateGameObj4.y, mRotateGameObj4.width, mRotateGameObj4.height, false);
+        mPulleyDef1 = createPolygon(mPulleyGameObj1.x, mPulleyGameObj1.y, mPulleyGameObj1.width, mPulleyGameObj1.height, false);
+        mPulleyDef2 = createPolygon(mPulleyGameObj2.x, mPulleyGameObj2.y, mPulleyGameObj2.width, mPulleyGameObj2.height, false);
+        mMoveDef = createPolygon(mMoveGameObj.x, mMoveGameObj.y, mMoveGameObj.width, mMoveGameObj.height, false);
+        mMoveDef2 = createPolygon(mRectGameObj2.x, mRectGameObj2.y, mRectGameObj2.width, mRectGameObj2.height, false);
+
+        //绑定gameobj和bodydef
+        addGameBodyBind(mRectGameObj2, mMoveDef2);
+        addGameBodyBind(mMoveGameObj, mMoveDef);
+        addGameBodyBind(mPulleyGameObj2, mPulleyDef2);
+        addGameBodyBind(mPulleyGameObj1, mPulleyDef1);
+        addGameBodyBind(mRotateGameObj4, mRotateDef4);
+        addGameBodyBind(mRotateGameObj3, mRotateDef3);
+        addGameBodyBind(mRotateGameObj, mRotateDef);
+        addGameBodyBind(mRotateGameObj2, mRotateDef2);
+        addGameBodyBind(mRectGameObj,createPolygon(mRectGameObj.x, mRectGameObj.y, mRectGameObj.width, mRectGameObj.height,true));
+        addGameBodyBind(circleGameObj,circleDef);
+        addGameBodyBind(mImgGameObj,polygon2);
+        addGameBodyBind(mBallTypeGameObj,body);
+        addGameBodyBind(mBallTypeGameObj2, this.polygon);
+        addGameBodyBind(lineBody,polygonForLine);
+        addGameBodyBind(mRectGameObj1, topDef);
+        addGameBodyBind(rectGameObj2,bottomDef);
+
+    }
+
+    private void initGameObject() {
+        mBallTypeGameObj = new BitmapGameObj(getContext());
+        addGameObj(mBallTypeGameObj);
+        mBallTypeGameObj.x=(screenWitdh- mBallTypeGameObj.width)/2;
+        mBallTypeGameObj.y=50;
+        mBallTypeGameObj.index=2;
+        mBallTypeGameObj.isVisible=true;
+        mImgGameObj = new RectGameObj(getContext());
+        addGameObj(mImgGameObj);
+        mImgGameObj.index=5;
+        mImgGameObj.x=(screenWitdh- mImgGameObj.width)/2;
+        mImgGameObj.y=-400;
+        mBallTypeGameObj2 = new BitmapGameObj(getContext());
+        addGameObj(mBallTypeGameObj2);
+        mBallTypeGameObj2.index=0;
+        mBallTypeGameObj2.x=(screenWitdh- mBallTypeGameObj2.width)/2;
+        mBallTypeGameObj2.y=900;
+        lineBody = new LineBody(getContext());
+        addGameObj(lineBody);
+        lineBody.x=(screenWitdh-lineBody.width)/2;
+        lineBody.y=0;
+        circleGameObj = new CircleGameObj(getContext());
+        addGameObj(circleGameObj);
+        circleGameObj.x=(screenWitdh-circleGameObj.width)/2;
+        circleGameObj.y=0;
+        mRectGameObj = new RectGameObj(getContext());
+        addGameObj(mRectGameObj);
+        mRectGameObj.x=0;
+        mRectGameObj.y=300;
+        mRectGameObj.width=200;
+        mRectGameObj.height=10;
+        mRectGameObj1 = new RectGameObj(getContext());
+        mRectGameObj1.x=0;
+        mRectGameObj1.y=250;
+        mRectGameObj1.width=100;
+        mRectGameObj1.height=10;
+        addGameObj(mRectGameObj1);
+
+        rectGameObj2 = new RectGameObj(getContext());
+        rectGameObj2.x=100;
+        rectGameObj2.y=600;
+        rectGameObj2.width=100;
+        rectGameObj2.height=20;
+        addGameObj(rectGameObj2);
+
+        lineGameObj = new LineGameObj(getContext());
+        addGameObj(lineGameObj);
+        lineGameObj.index=8;
+
+        mRotateGameObj = new RectGameObj(getContext());
+        mRotateGameObj.x=0;
+        mRotateGameObj.y=805;
+        mRotateGameObj.width=200;
+        mRotateGameObj.height=10;
+        addGameObj(mRotateGameObj);
+
+        mRotateGameObj2 = new RectGameObj(getContext());
+        mRotateGameObj2.x=0;
+        mRotateGameObj2.y=800;
+        mRotateGameObj2.width=200;
+        mRotateGameObj2.height=20;
+        addGameObj(mRotateGameObj2);
+
+        mRotateGameObj3 = new RectGameObj(getContext());
+        mRotateGameObj3.x=0;
+        mRotateGameObj3.y=1205;
+        mRotateGameObj3.width=200;
+        mRotateGameObj3.height=10;
+        addGameObj(mRotateGameObj3);
+
+        mRotateGameObj4 = new RectGameObj(getContext());
+        mRotateGameObj4.x=0;
+        mRotateGameObj4.y=1705;
+        mRotateGameObj4.width=200;
+        mRotateGameObj4.height=10;
+        addGameObj(mRotateGameObj4);
+
+        mPulleyGameObj1 = new RectGameObj(getContext());
+        mPulleyGameObj1.width=100;
+        mPulleyGameObj1.height=200;
+        mPulleyGameObj1.x=(screenWitdh- mPulleyGameObj1.width)/2;
+        mPulleyGameObj1.y=1700;
+        addGameObj(mPulleyGameObj1);
+
+        mPulleyGameObj2 = new RectGameObj(getContext());
+        mPulleyGameObj2.width=100;
+        mPulleyGameObj2.height=100;
+        mPulleyGameObj2.x=(screenWitdh- mPulleyGameObj2.width)/2+300;
+        mPulleyGameObj2.y=1700;
+        addGameObj(mPulleyGameObj2);
+
+        mPulleyLine3 = new PulleyLine(getContext());
+        mPulleyLine3.width=100;
+        mPulleyLine3.height=100;
+        mPulleyLine3.x=(screenWitdh- mPulleyGameObj2.width)/2+300;
+        mPulleyLine3.y=1700;
+        addGameObj(mPulleyLine3);
+
+        mMoveGameObj = new RectGameObj(getContext());
+        mMoveGameObj.width=100;
+        mMoveGameObj.height=100;
+        mMoveGameObj.x=570;
+        mMoveGameObj.y=0;
+        addGameObj(mMoveGameObj);
+
+        mRectGameObj2 = new RectGameObj(getContext());
+        mRectGameObj2.width=120;
+        mRectGameObj2.height=100;
+        mRectGameObj2.x=560;
+        mRectGameObj2.y=140;
+        addGameObj(mRectGameObj2);
+
+        mMoveLine = new MoveLine(getContext());
+        addGameObj(mMoveLine);
+    }
+
+    private void initConfig() {
+        setKeepScreenOn(true);
+        setFocusable(true);
+        setOnClickListener(this);
+
+        paint = new Paint();
+        paint.setAntiAlias(true);
+        paint.setStrokeWidth(10);
+        paint.setColor(Color.BLACK);
+
+        aabb1 = new AABB();
+    }
+
 
     @Override
     public boolean onTouchEvent(MotionEvent event) {
@@ -317,7 +324,7 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         aabb1.lowerBound.set(touchX/RATE,touchY/RATE);
         aabb1.upperBound.set((touchX+100)/RATE,(touchY+100)/RATE);
         Shape[] query = world.query(aabb1, 100);
-        Log.i("mytool","body size=="+query.length);
+        Log.i(TAG,"body size=="+query.length);
         return super.onTouchEvent(event);
     }
 
@@ -352,7 +359,7 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         prismaticJointDef.lowerTranslation=-moveMax/RATE;// 设置位移最小偏移值
         prismaticJointDef.upperTranslation=moveMax/RATE;//设置位移最大偏移值
         prismaticJointDef.enableLimit=true;//开启限制
-        prismaticJointDef.initialize(world.getGroundBody(),moveObjBody,moveObjBody.getWorldCenter(),new Vec2(1,0));
+        prismaticJointDef.initialize(world.getGroundBody(), mMoveDef, mMoveDef.getWorldCenter(),new Vec2(1,0));
         Joint joint = world.createJoint(prismaticJointDef);
     }
 
@@ -367,7 +374,7 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         prismaticJointDef.upperTranslation=moveMax/RATE;//设置位移最大偏移值
         prismaticJointDef.enableLimit=true;//开启限制
         Vec2 vec2 = new Vec2(1, 0);//设置伸缩方向还是左右方向 当前左右方向
-        prismaticJointDef.initialize(moveObjBody,moveObjBody2,moveObjBody.getWorldCenter(),vec2);
+        prismaticJointDef.initialize(mMoveDef, mMoveDef2, mMoveDef.getWorldCenter(),vec2);
         Joint joint = world.createJoint(prismaticJointDef);
     }
 
@@ -375,9 +382,9 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
     //双还轮方式
     private void huaLunDouble(){
         PulleyJointDef pulleyJointDef=new PulleyJointDef();
-        Vec2 vec2=new Vec2((huanLun1.x+huanLun1.width/2)/RATE, (huanLun1.y-300)/RATE);
-        Vec2 vec21=new Vec2( (huanLun2.x+huanLun1.width/2)/RATE, (huanLun2.y-300)/RATE );
-        pulleyJointDef.initialize(huaLunDef1,huaLunDef2,vec2,vec21,huaLunDef1.getWorldCenter(),huaLunDef2.getWorldCenter(),1f);
+        Vec2 vec2=new Vec2((mPulleyGameObj1.x+ mPulleyGameObj1.width/2)/RATE, (mPulleyGameObj1.y-300)/RATE);
+        Vec2 vec21=new Vec2( (mPulleyGameObj2.x+ mPulleyGameObj1.width/2)/RATE, (mPulleyGameObj2.y-300)/RATE );
+        pulleyJointDef.initialize(mPulleyDef1, mPulleyDef2,vec2,vec21, mPulleyDef1.getWorldCenter(), mPulleyDef2.getWorldCenter(),1f);
         Joint joint = world.createJoint(pulleyJointDef);
     }
 
@@ -385,24 +392,24 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         GearJointDef gearJointDef=new GearJointDef();
         gearJointDef.joint1=revoluteJoint;
         gearJointDef.joint2=revoluteJoint1;
-        gearJointDef.body1=xuanDef3;
-        gearJointDef.body2=xuanDef4;
+        gearJointDef.body1= mRotateDef3;
+        gearJointDef.body2= mRotateDef4;
         gearJointDef.ratio=2;//角度比
         GearJoint gearJoint= (GearJoint) world.createJoint(gearJointDef);
     }
 
     private void addBodyMaDa() {
         RevoluteJointDef revoluteJointDef=new RevoluteJointDef();
-        revoluteJointDef.initialize(xuanDef,xuanDef2,xuanDef.getWorldCenter());
+        revoluteJointDef.initialize(mRotateDef, mRotateDef2, mRotateDef.getWorldCenter());
         revoluteJointDef.maxMotorTorque=100;//扭矩
         revoluteJointDef.motorSpeed=10;//速度
         revoluteJointDef.enableMotor=true;//启动
-        xuanJoin = (RevoluteJoint) world.createJoint(revoluteJointDef);
+        rotateJoint = (RevoluteJoint) world.createJoint(revoluteJointDef);
     }
 
     private RevoluteJoint addBodyMaDa3() {
         RevoluteJointDef revoluteJointDef=new RevoluteJointDef();
-        revoluteJointDef.initialize(world.getGroundBody(),xuanDef3,xuanDef3.getWorldCenter());
+        revoluteJointDef.initialize(world.getGroundBody(), mRotateDef3, mRotateDef3.getWorldCenter());
         revoluteJointDef.maxMotorTorque=20;//扭矩
         revoluteJointDef.motorSpeed=20;//速度
         revoluteJointDef.enableMotor=true;//启动
@@ -412,7 +419,7 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
 
     private RevoluteJoint addBodyMaDa4() {
         RevoluteJointDef revoluteJointDef=new RevoluteJointDef();
-        revoluteJointDef.initialize(world.getGroundBody(),xuanDef4,xuanDef4.getWorldCenter());
+        revoluteJointDef.initialize(world.getGroundBody(), mRotateDef4, mRotateDef4.getWorldCenter());
         RevoluteJoint joint = (RevoluteJoint) world.createJoint(revoluteJointDef);
         return joint;
     }
@@ -425,14 +432,7 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
 
     @Override
     public void start() {
-        handler.post(new Runnable() {
-            @Override
-            public void run() {
-                invalidate();
-                updateView();
-                handler.postDelayed(this, (long) (timeStep*1000));
-            }
-        });
+        startBox2dWord(timeStep, iterations);
     }
 
 
@@ -447,14 +447,10 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         return world;
     }
 
-    private void updateView() {
-        bindGameBody(timeStep,iterations);
-    }
-
 
     @Override
     public void onClick(View v) {
-        imgGameObj.body.applyForce(new Vec2(0,-5000),imgGameObj.body.getWorldCenter());
+        mImgGameObj.body.applyForce(new Vec2(0,-5000), mImgGameObj.body.getWorldCenter());
         bottomDef.applyForce(new Vec2(10,-1000),bottomDef.getWorldCenter());
         Log.i(tag,"touch");
     }

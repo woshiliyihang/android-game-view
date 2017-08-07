@@ -11,14 +11,14 @@ import gameview.com.sijienet.com.androidgameviewbase.GameObj;
 /**
  * Created by user on 2017/5/22.
  */
-public class HuaLunDrawLine extends GameObj {
+public class PulleyLine extends GameObj {
 
     public Body body;
     public Body body2;
     public float RATE;
     public float screentWidth;
 
-    public HuaLunDrawLine(Context context) {
+    public PulleyLine(Context context) {
         super(context);
         setColor(Color.BLUE);
         setStrokeWidth(2);

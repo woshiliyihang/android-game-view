@@ -10,6 +10,7 @@ import android.view.MotionEvent;
 import android.view.View;
 import android.view.WindowManager;
 
+import org.jbox2d.collision.AABB;
 import org.jbox2d.collision.CircleDef;
 import org.jbox2d.collision.PolygonDef;
 import org.jbox2d.common.Vec2;
@@ -25,6 +26,8 @@ import java.util.Comparator;
  * Created by user on 2017/5/19.
  */
 public abstract class AndroidGameViewBase extends View {
+
+    public static final String TAG="android-game-view";
 
     private ArrayList<GameObj> gameObjs=new ArrayList<>();
     public Handler handler=new Handler();
@@ -173,6 +176,25 @@ public abstract class AndroidGameViewBase extends View {
         systemService.getDefaultDisplay().getMetrics(mx);
         screenWitdh=mx.widthPixels;
         screenHeight=mx.heightPixels;
+    }
+
+    public World initBox2dWorld(Vec2 gravity) {
+        //设置物理世界
+        AABB aabb = new AABB();
+        aabb.lowerBound.set(-100f, -100f);
+        aabb.upperBound.set(100f, 100f);
+        return new World(aabb, gravity, true);
+    }
+
+    public void startBox2dWord(final float timeStep, final int iterations){
+        handler.post(new Runnable() {
+            @Override
+            public void run() {
+                invalidate();
+                bindGameBody(timeStep,iterations);
+                handler.postDelayed(this, (long) (timeStep*1000));
+            }
+        });
     }
 
     @Override
