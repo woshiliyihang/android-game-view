@@ -3,7 +3,6 @@
   <component name="ProjectModuleManager">
     <modules>
       <module fileurl="file://$PROJECT_DIR$/AndroidGameView.iml" filepath="$PROJECT_DIR$/AndroidGameView.iml" />
-      <module fileurl="file://$PROJECT_DIR$/androidgameviewbase/androidgameviewbase.iml" filepath="$PROJECT_DIR$/androidgameviewbase/androidgameviewbase.iml" />
       <module fileurl="file://$PROJECT_DIR$/app/app.iml" filepath="$PROJECT_DIR$/app/app.iml" />
       <module fileurl="file://$PROJECT_DIR$/lib_game_view/lib_game_view.iml" filepath="$PROJECT_DIR$/lib_game_view/lib_game_view.iml" />
     </modules>
