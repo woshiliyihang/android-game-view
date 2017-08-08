@@ -331,6 +331,8 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
     @Override
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
+
+        //自定义回执内容
         canvas.drawLine(mouseJoint.m_target.x*RATE,mouseJoint.m_target.y*RATE, polygon2.getWorldCenter().x*RATE, polygon2.getWorldCenter().y*RATE, paint);
         canvas.drawRect(touchX,touchY,touchX+100, touchY+100,paint);
     }
@@ -434,8 +436,6 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
     public void start() {
         startBox2dWord(timeStep, iterations);
     }
-
-
 
     @Override
     public float getRate() {
