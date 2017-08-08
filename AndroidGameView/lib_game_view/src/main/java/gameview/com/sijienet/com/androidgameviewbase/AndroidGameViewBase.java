@@ -30,10 +30,10 @@ public abstract class AndroidGameViewBase extends View {
 
     public static final String TAG="android-game-view";
 
-    private ArrayList<GameObj> gameObjs=new ArrayList<>();
-    public Handler handler=new Handler();
-
-    private ArrayList<BodyBind> bodyBinds=new ArrayList<>();
+    private ArrayList<GameObj> gameObjs;
+    public Handler handler;
+    private ArrayList<BodyBind> bodyBinds;
+    private boolean isFirstLoading;
 
     public static class BodyBind{
         public Body body;
@@ -50,38 +50,30 @@ public abstract class AndroidGameViewBase extends View {
 
     public AndroidGameViewBase(Context context) {
         super(context);
-        getConfig();
+        baseConfig();
         init();
-        post(new Runnable() {
-            @Override
-            public void run() {
-                start();
-            }
-        });
     }
 
     public AndroidGameViewBase(Context context, AttributeSet attrs) {
         super(context, attrs);
-        getConfig();
+        baseConfig();
         init();
-        post(new Runnable() {
-            @Override
-            public void run() {
-                start();
-            }
-        });
     }
 
     public AndroidGameViewBase(Context context, AttributeSet attrs, int defStyleAttr) {
         super(context, attrs, defStyleAttr);
-        getConfig();
+        baseConfig();
         init();
-        post(new Runnable() {
-            @Override
-            public void run() {
-                start();
-            }
-        });
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        if (isFirstLoading && changed)
+        {
+            isFirstLoading=false;
+            start();
+        }
     }
 
     public void addGameObj(GameObj gameObj){
@@ -171,7 +163,14 @@ public abstract class AndroidGameViewBase extends View {
         });
     }
 
-    private void getConfig() {
+    private void baseConfig() {
+
+        isFirstLoading=true;
+
+        handler=new Handler();
+        bodyBinds=new ArrayList<>();
+        gameObjs=new ArrayList<>();
+
         WindowManager systemService = (WindowManager) getContext().getSystemService(Context.WINDOW_SERVICE);
         DisplayMetrics mx=new DisplayMetrics();
         systemService.getDefaultDisplay().getMetrics(mx);
