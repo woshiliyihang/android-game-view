@@ -120,20 +120,20 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         mBallTypeGameObj2.body.getShapeList().getFilterData().groupIndex=4;
 
         //添加关节
-        addBodyJoin();
+        distanceJoint();
         lineGameObj.distanceJoint=joint;
         lineGameObj.rate=RATE;
 
         //添加关节
-        addBodyMaDa();
+        motorJoint();
 
-        RevoluteJoint revoluteJoint = addBodyMaDa3();
-        RevoluteJoint revoluteJoint1 = addBodyMaDa4();
+        RevoluteJoint revoluteJoint = motorJoint3();
+        RevoluteJoint revoluteJoint1 = motorJoint4();
         //齿轮关节
-        chaLun(revoluteJoint,revoluteJoint1);
+        gearJoint(revoluteJoint,revoluteJoint1);
 
         //滑轮关节
-        huaLunDouble();
+        pulleyJoint();
 
         //移动关节
 //        moveJoint();
@@ -332,13 +332,21 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
     protected void onDraw(Canvas canvas) {
         super.onDraw(canvas);
 
+        updateFrameView(canvas);
+    }
+
+    /**
+     *
+     * 每一帧更新逻辑
+     */
+    private void updateFrameView(Canvas canvas) {
         //自定义回执内容
         canvas.drawLine(mouseJoint.m_target.x*RATE,mouseJoint.m_target.y*RATE, polygon2.getWorldCenter().x*RATE, polygon2.getWorldCenter().y*RATE, paint);
         canvas.drawRect(touchX,touchY,touchX+100, touchY+100,paint);
     }
 
-    //鼠标移动移动关节
     private MouseJoint getMouseJoint(){
+        //鼠标移动移动关节
         MouseJointDef mouseJointDef=new MouseJointDef();
         mouseJointDef.body1=world.getGroundBody();
         mouseJointDef.body2=polygon2;
@@ -351,8 +359,9 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         return mouseJoint;
     }
 
-    //相对于墙壁的移动关节
+
     private void moveJoint() {
+        //相对于墙壁的移动关节
         PrismaticJointDef prismaticJointDef=new PrismaticJointDef();
         prismaticJointDef.maxMotorForce=90;//最大马力
         prismaticJointDef.motorSpeed=10;//最大玛丽
@@ -365,8 +374,9 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         Joint joint = world.createJoint(prismaticJointDef);
     }
 
-    //移动关节
+
     private void moveJoint2() {
+        //移动关节
         PrismaticJointDef prismaticJointDef=new PrismaticJointDef();
         prismaticJointDef.maxMotorForce=10;//最大马力
         prismaticJointDef.motorSpeed=10;//最大玛丽
@@ -381,8 +391,9 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
     }
 
 
-    //双还轮方式
-    private void huaLunDouble(){
+
+    private void pulleyJoint(){
+        //双还轮方式
         PulleyJointDef pulleyJointDef=new PulleyJointDef();
         Vec2 vec2=new Vec2((mPulleyGameObj1.x+ mPulleyGameObj1.width/2)/RATE, (mPulleyGameObj1.y-300)/RATE);
         Vec2 vec21=new Vec2( (mPulleyGameObj2.x+ mPulleyGameObj1.width/2)/RATE, (mPulleyGameObj2.y-300)/RATE );
@@ -390,7 +401,7 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         Joint joint = world.createJoint(pulleyJointDef);
     }
 
-    private void chaLun(RevoluteJoint revoluteJoint, RevoluteJoint revoluteJoint1) {
+    private void gearJoint(RevoluteJoint revoluteJoint, RevoluteJoint revoluteJoint1) {
         GearJointDef gearJointDef=new GearJointDef();
         gearJointDef.joint1=revoluteJoint;
         gearJointDef.joint2=revoluteJoint1;
@@ -400,7 +411,10 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         GearJoint gearJoint= (GearJoint) world.createJoint(gearJointDef);
     }
 
-    private void addBodyMaDa() {
+    /**
+     * 马达转动
+     */
+    private void motorJoint() {
         RevoluteJointDef revoluteJointDef=new RevoluteJointDef();
         revoluteJointDef.initialize(mRotateDef, mRotateDef2, mRotateDef.getWorldCenter());
         revoluteJointDef.maxMotorTorque=100;//扭矩
@@ -409,7 +423,7 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         rotateJoint = (RevoluteJoint) world.createJoint(revoluteJointDef);
     }
 
-    private RevoluteJoint addBodyMaDa3() {
+    private RevoluteJoint motorJoint3() {
         RevoluteJointDef revoluteJointDef=new RevoluteJointDef();
         revoluteJointDef.initialize(world.getGroundBody(), mRotateDef3, mRotateDef3.getWorldCenter());
         revoluteJointDef.maxMotorTorque=20;//扭矩
@@ -419,14 +433,17 @@ public class GameView extends AndroidGameViewBase implements View.OnClickListene
         return joint;
     }
 
-    private RevoluteJoint addBodyMaDa4() {
+    private RevoluteJoint motorJoint4() {
         RevoluteJointDef revoluteJointDef=new RevoluteJointDef();
         revoluteJointDef.initialize(world.getGroundBody(), mRotateDef4, mRotateDef4.getWorldCenter());
         RevoluteJoint joint = (RevoluteJoint) world.createJoint(revoluteJointDef);
         return joint;
     }
 
-    private void addBodyJoin() {
+    /**
+     * 距离关节
+     */
+    private void distanceJoint() {
         DistanceJointDef jointDef=new DistanceJointDef();
         jointDef.initialize(topDef,bottomDef,topDef.getWorldCenter(),bottomDef.getWorldCenter());
         joint = (DistanceJoint)world.createJoint(jointDef);
