@@ -1,7 +1,8 @@
 package gameview.com.sijienet.com.androidgameviewbase;
 
 /**
- * Created by user on 2017/5/19.
+ * 作者：李一航
+ * 博客：http://sijienet.com/
  */
 public interface OnUpdateAnimer {
     void run(int index);

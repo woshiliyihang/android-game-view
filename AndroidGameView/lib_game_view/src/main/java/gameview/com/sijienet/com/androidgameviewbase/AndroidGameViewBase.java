@@ -23,7 +23,8 @@ import java.util.Collections;
 import java.util.Comparator;
 
 /**
- * Created by user on 2017/5/19.
+ * 作者：李一航
+ * 博客：http://sijienet.com/
  */
 public abstract class AndroidGameViewBase extends View {
 

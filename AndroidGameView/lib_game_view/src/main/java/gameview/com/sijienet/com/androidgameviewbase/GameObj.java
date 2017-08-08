@@ -11,7 +11,8 @@ import android.view.MotionEvent;
 import org.jbox2d.dynamics.Body;
 
 /**
- * Created by user on 2017/5/19.
+ * 作者：李一航
+ * 博客：http://sijienet.com/
  */
 public abstract class GameObj extends Paint {
 

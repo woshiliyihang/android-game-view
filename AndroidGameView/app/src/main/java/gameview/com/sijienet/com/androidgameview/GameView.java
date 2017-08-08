@@ -31,7 +31,8 @@ import org.jbox2d.dynamics.joints.RevoluteJointDef;
 import gameview.com.sijienet.com.androidgameviewbase.AndroidGameViewBase;
 
 /**
- * Created by user on 2017/5/19.
+ * 作者：李一航
+ * 博客：http://sijienet.com/
  */
 public class GameView extends AndroidGameViewBase implements View.OnClickListener, ContactListener {
 

@@ -9,7 +9,8 @@ import org.jbox2d.dynamics.Body;
 import gameview.com.sijienet.com.androidgameviewbase.GameObj;
 
 /**
- * Created by user on 2017/5/19.
+ * 作者：李一航
+ * 博客：http://sijienet.com/
  */
 public class RectGameObj extends GameObj {
 

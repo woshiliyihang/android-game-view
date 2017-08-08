@@ -7,7 +7,8 @@ import android.graphics.Color;
 import gameview.com.sijienet.com.androidgameviewbase.GameObj;
 
 /**
- * Created by user on 2017/5/20.
+ * 作者：李一航
+ * 博客：http://sijienet.com/
  */
 public class LineBody extends GameObj {
 
